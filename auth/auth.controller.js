@@ -47,3 +47,27 @@ exports.userLogin = (req, res, next) => {
             next(error)
         })
 }
+
+const handleAuthError = (next, message) => {
+    const error = new Error(message || 'Your login credentials have expired, please log in and try again.');
+    error.status = 401;
+    return next(error);
+};
+
+exports.authenticate = (req, res, next) => {
+    const api = req.headers['api'];
+    if (!api) {
+        return handleAuthError(next)
+    };
+    User.findOne({apiToken: api})
+        .then(user => {
+            if (!user || user.apiExpiration.getTime() < Date.now()) {
+                return handleAuthError(next)
+            };
+            next()
+        })
+        .catch(err => {
+            err.status = 500;
+            next(err)
+        })
+}
