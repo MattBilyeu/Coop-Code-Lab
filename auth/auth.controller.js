@@ -40,6 +40,7 @@ exports.userLogin = (req, res, next) => {
             })
         })
         .then(() => {
+            foundUser.password = 'Redacted';
             res.status(200).json(foundUser)
         })
         .catch(error => {
